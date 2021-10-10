@@ -81,6 +81,14 @@ class TestApiGetOptionA(unittest.TestCase):
         assert body["data"]["last_name"] == "Weaver"
         assert body["data"]["avatar"] == "https://reqres.in/img/faces/2-image.jpg"
 
+    def test_single_user_not_found(self):
+        response = requests.get(self.base_url + '/13')
+        body = response.json()
+        assert response.status_code != 200
+        assert response.status_code == 404
+        assert len(body) == 0
+
+
 
 class TestApiGetOptionB(unittest.TestCase):
 
