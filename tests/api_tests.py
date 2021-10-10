@@ -2,9 +2,15 @@ import unittest
 import requests
 
 
-class TestApiOptionA(unittest.TestCase):
+class TestApiGetOptionA(unittest.TestCase):
 
+    # stores the URL pagination in a list, based on the number of pages, also stores, the same with the responses and
+    #   bodies of the response.
+    # Why? - because the endpoint has 2 pages and I did not want to send the request in 2 scenarios
+    # Would this be useful in case the endpoint has a big number of pages??
     def setUp(self):
+        self.base_url = 'https://reqres.in/api/users'
+        self.page = '?page={}'
         self.total_pages = 2
         self.pagination = []
         self.urls = []
@@ -12,7 +18,7 @@ class TestApiOptionA(unittest.TestCase):
         self.bodies = []
         for x in range(self.total_pages):
             self.pagination.append(x + 1)
-            self.paginated_url = 'https://reqres.in/api/users?page={}'.format(self.pagination[x])
+            self.paginated_url = self.base_url + self.page.format(self.pagination[x])
             self.urls.append(self.paginated_url)
             self.response = requests.get(self.paginated_url)
             self.request_responses.append(self.response)
@@ -20,11 +26,12 @@ class TestApiOptionA(unittest.TestCase):
             self.bodies.append(self.body)
             # print(self.urls)
 
-    def test_get_pages(self):
-        for x in range(len(self.urls)):
-            print(self.urls[x])
-            print(self.request_responses[x])
-            print(self.bodies[x])
+    # just to check if the setUp method works
+    # def test_get_pages(self):
+    #     for x in range(len(self.urls)):
+    #         print(self.urls[x])
+    #         print(self.request_responses[x])
+    #         print(self.bodies[x])
 
     # validates the 'main attributes' in the response ('page', 'per_page', 'total', 'total_pages', and that 'data' is
     # filled)
@@ -35,7 +42,7 @@ class TestApiOptionA(unittest.TestCase):
             assert self.bodies[x]["page"] == self.pagination[x]
             assert self.bodies[x]["per_page"] == 6
             assert self.bodies[x]["total_pages"] == self.total_pages
-            print(self.bodies[x])
+            # print(self.bodies[x])
 
     # asserts 'data' list, that its attributes are present and not empty
     def test_api_list_users_data(self):
@@ -43,11 +50,39 @@ class TestApiOptionA(unittest.TestCase):
             data = self.bodies[x]["data"]
             for data_index in data:
                 assert len(data_index) == 5
+                # print(data_index["email"])
                 for j in data_index.values():
                     assert j is not None
 
+    def test_single_user(self):
+        response = requests.get(self.base_url+'/13')
+        body = response.json()
+        assert response.status_code == 200
+        for x in range(len(self.bodies)):
+            data = self.bodies[x]["data"]
+            for data_index in data:
+                if data_index["id"] == body["data"]["id"]:
+                    assert data_index["id"] == body["data"]["id"]
+                    assert data_index["email"] == body["data"]["email"]
+                    assert data_index["first_name"] == body["data"]["first_name"]
+                    assert data_index["last_name"] == body["data"]["last_name"]
+                    assert data_index["avatar"] == body["data"]["avatar"]
+                    # print("asserted!")
+                    return
+                # print(data_index["id"])
 
-class TestApiOptionB(unittest.TestCase):
+    def test_single_user_version2(self):
+        response = requests.get(self.base_url + '/2')
+        body = response.json()
+        assert response.status_code == 200
+        assert body["data"]["id"] == 2
+        assert body["data"]["email"] == "janet.weaver@reqres.in"
+        assert body["data"]["first_name"] == "Janet"
+        assert body["data"]["last_name"] == "Weaver"
+        assert body["data"]["avatar"] == "https://reqres.in/img/faces/2-image.jpg"
+
+
+class TestApiGetOptionB(unittest.TestCase):
 
     def setUp(self):
         self.pages = [1, 2]
@@ -61,16 +96,16 @@ class TestApiOptionB(unittest.TestCase):
             assert len(response_body["data"]) > 0
             assert response_body["page"] == x
             assert response_body["per_page"] == 6
-            assert response_body["total_pages"] == len(pages)
+            assert response_body["total_pages"] == len(self.pages)
 
-    def test_api_list_users_data(self):
-        for x in self.pages:
-            url = self.get_url.format(x)
-            response = requests.get(url)
-            response_body = response.json()
-            data = response_body["data"]
-            for data_index in data:
-                print(data_index)
+    # def test_api_list_users_data(self):
+    #     for x in self.pages:
+    #         url = self.get_url.format(x)
+    #         response = requests.get(url)
+    #         response_body = response.json()
+    #         data = response_body["data"]
+    #         for data_index in data:
+    #             print(data_index)
 
 
 if __name__ == '__main__':
