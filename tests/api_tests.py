@@ -55,7 +55,7 @@ class TestApiGetOptionA(unittest.TestCase):
                     assert j is not None
 
     def test_single_user(self):
-        response = requests.get(self.base_url+'/13')
+        response = requests.get(self.base_url + '/12')
         body = response.json()
         assert response.status_code == 200
         for x in range(len(self.bodies)):
@@ -87,6 +87,51 @@ class TestApiGetOptionA(unittest.TestCase):
         assert response.status_code != 200
         assert response.status_code == 404
         assert len(body) == 0
+
+
+class TestCRUDMethods(unittest.TestCase):
+
+    def setUp(self):
+        print('setting up')
+        self.base_url = 'https://reqres.in/api/users'
+        self.user_id = '192'
+
+    # using a loop in case I would like to create more users
+    # I update the created ID in the dictionary for the PUT test in order to use the same
+    def test_create_user(self):
+        attributes_create = [{
+            "name": "morpheus",
+            "job": "leader"},
+            {
+                "name": "neo",
+                "job": "chosen one"},
+            {
+                "name": "Shinji Ikari",
+                "job": "pilot"
+            }]
+        for x in range(len(attributes_create)):
+            response = requests.post(self.base_url, json=attributes_create[x])
+            body = response.json()
+            assert response.status_code == 201
+            assert body["name"] == attributes_create[x]["name"]
+            assert body["job"] == attributes_create[x]["job"]
+            assert int(body["id"]) > 0
+            assert body["createdAt"] is not None
+            # print(body)
+
+    def test_update_user(self):
+
+        attributes_update = {
+            "name": "morpheus",
+            "job": "zion resident updated"}
+        response = requests.put(self.base_url+self.user_id, json=attributes_update)
+        body = response.json()
+        print(attributes_update)
+        print(body)
+
+    def test_delete_user(self):
+        response = requests.delete(self.base_url+self.user_id)
+        assert response.status_code == 204
 
 
 
