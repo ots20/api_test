@@ -120,19 +120,46 @@ class TestCRUDMethods(unittest.TestCase):
             # print(body)
 
     def test_update_user(self):
-
         attributes_update = {
             "name": "morpheus",
             "job": "zion resident updated"}
-        response = requests.put(self.base_url+self.user_id, json=attributes_update)
+        response = requests.put(self.base_url + self.user_id, json=attributes_update)
         body = response.json()
         print(attributes_update)
         print(body)
 
     def test_delete_user(self):
-        response = requests.delete(self.base_url+self.user_id)
+        response = requests.delete(self.base_url + self.user_id)
         assert response.status_code == 204
 
+
+class TestRegister(unittest.TestCase):
+
+    def setUp(self):
+        self.base_url = 'https://reqres.in/api/register'
+        self.register_data = {
+            "email": "eve.holt@reqres.in",
+            "password": "pistol"
+            }
+
+    def test_register_success(self):
+        response = requests.post(self.base_url, json=self.register_data)
+        body = response.json()
+        assert response.status_code == 200
+        assert int(body["id"]) > 0
+        assert len(body["token"]) == 17
+
+    def test_register_failure(self):
+        attribute = ["email", "password"]
+        for x in range(len(attribute)):
+            response = requests.post(self.base_url, json={attribute[x]: "test@test.com"})
+            print(response.status_code)
+            body = response.json()
+            assert response.status_code == 400
+            if x == 0:
+                assert body["error"] == "Missing password"
+            else:
+                assert body["error"] == "Missing email or username"
 
 
 class TestApiGetOptionB(unittest.TestCase):
