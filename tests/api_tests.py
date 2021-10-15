@@ -1,4 +1,6 @@
 import unittest
+from datetime import timedelta
+
 import requests
 
 
@@ -44,7 +46,15 @@ class TestApiGetOptionA(unittest.TestCase):
             assert self.bodies[x]["total_pages"] == self.total_pages
             # print(self.bodies[x])
 
-    # asserts 'data' list, that its attributes are present and not empty
+    def test_delayed_response_fail(self):
+        response = requests.get(self.base_url + '?delay=3')
+        body = response.json()
+        self.assertFalse(response.elapsed < timedelta(seconds=3))
+        assert response.status_code == 200
+        assert body["data"] is not None
+
+
+        # asserts 'data' list, that its attributes are present and not empty
     def test_api_list_users_data(self):
         for x in range(len(self.bodies)):
             data = self.bodies[x]["data"]
@@ -153,7 +163,6 @@ class TestRegister(unittest.TestCase):
         attribute = ["email", "password"]
         for x in range(len(attribute)):
             response = requests.post(self.base_url, json={attribute[x]: "test@test.com"})
-            print(response.status_code)
             body = response.json()
             assert response.status_code == 400
             if x == 0:
