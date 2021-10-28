@@ -19,7 +19,7 @@ class TestApiGet(unittest.TestCase):
             assert body["page"] == x+1
             assert body["per_page"] == 6
 
-    I need to do this with the timeout exception!!
+    # I need to do this with the timeout exception!!
     def test_delayed_response_fail(self):
         response = requests.get(self.base_url + '?delay=3')
         body = response.json()
